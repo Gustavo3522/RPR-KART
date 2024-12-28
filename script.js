@@ -1,7 +1,8 @@
 const ADMIN_PASSWORD = "kartadmin123"; // Senha do administrador
 const VIEWER_PASSWORD = "tabela"; // Senha apenas para visualização
-const pilots = JSON.parse(localStorage.getItem("kartPilots")) || [];
+let pilots = JSON.parse(localStorage.getItem("kartPilots")) || [];
 let isAdmin = false; // Define se o usuário tem permissão de administrador
+
 // Função de Login
 function login() {
     const password = document.getElementById("password").value;
@@ -17,6 +18,7 @@ function login() {
         alert("Senha incorreta!");
     }
 }
+
 // Mostra o conteúdo baseado no tipo de usuário
 function showContent() {
     document.getElementById("loginForm").style.display = "none";
@@ -24,6 +26,7 @@ function showContent() {
     document.getElementById("addPilot").style.display = isAdmin ? "block" : "none";
     updateTable();
 }
+
 // Atualiza a tabela com base no tipo de usuário
 function updateTable() {
     const tableBody = document.getElementById("tableBody");
@@ -45,6 +48,7 @@ function updateTable() {
         tableBody.appendChild(row);
     });
 }
+
 // Atualiza os pontos de um piloto
 function updatePoints(index, value) {
     const newPoints = parseInt(value);
@@ -56,6 +60,7 @@ function updatePoints(index, value) {
         alert("Por favor, insira um valor válido para os pontos.");
     }
 }
+
 // Atualiza o melhor tempo de um piloto
 function updateBestLap(index, value) {
     const newBestLap = value.trim();
@@ -69,6 +74,7 @@ function updateBestLap(index, value) {
         alert("Por favor, insira um tempo válido no formato MM:SS.mmm.");
     }
 }
+
 // Adiciona um novo piloto (somente para administrador)
 function addPilot() {
     if (!isAdmin) return;
@@ -78,6 +84,7 @@ function addPilot() {
     savePilots();
     updateTable();
 }
+
 // Remove um piloto (somente para administrador)
 function removePilot(index) {
     if (!isAdmin) return;
@@ -87,12 +94,35 @@ function removePilot(index) {
         updateTable();
     }
 }
-// Salva os pilotos no localStorage
+
+// Função para salvar os pilotos no Firestore
 function savePilots() {
-    localStorage.setItem("kartPilots", JSON.stringify(pilots));
+    db.collection("pilots").doc("kartData").set({
+        pilots: pilots
+    }).then(() => {
+        console.log("Dados salvos com sucesso!");
+    }).catch((error) => {
+        console.error("Erro ao salvar dados: ", error);
+    });
 }
-// Inicia a aplicação
+
+// Função para recuperar os pilotos do Firestore
+function loadPilots() {
+    db.collection("pilots").doc("kartData").get().then((doc) => {
+        if (doc.exists) {
+            pilots = doc.data().pilots; // Carrega os pilotos salvos no Firestore
+            updateTable(); // Atualiza a tabela com os dados carregados
+        } else {
+            console.log("Nenhum dado encontrado.");
+        }
+    }).catch((error) => {
+        console.error("Erro ao carregar dados: ", error);
+    });
+}
+
+// Carregar os dados ao iniciar a aplicação
 window.onload = function () {
+    loadPilots(); // Carrega os pilotos ao abrir a página
     document.getElementById("loginForm").style.display = "flex";
     document.getElementById("content").style.display = "none";
 };
