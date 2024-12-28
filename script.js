@@ -1,7 +1,78 @@
 const ADMIN_PASSWORD = "kartadmin123"; // Senha do administrador
 const VIEWER_PASSWORD = "tabela"; // Senha apenas para visualização
-const pilots = JSON.parse(localStorage.getItem("kartPilots")) || [];
+let pilots = []; // Array de pilotos
 let isAdmin = false; // Define se o usuário tem permissão de administrador
+const dbName = 'kartChampionship'; // Nome do banco de dados
+const storeName = 'pilots'; // Nome da store para guardar pilotos
+
+// Abre ou cria o banco de dados
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName, 1);
+
+        request.onupgradeneeded = function (e) {
+            const db = e.target.result;
+            const objectStore = db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+            objectStore.createIndex('name', 'name', { unique: false });
+            objectStore.createIndex('points', 'points', { unique: false });
+            objectStore.createIndex('bestLap', 'bestLap', { unique: false });
+        };
+
+        request.onsuccess = function (e) {
+            resolve(e.target.result);
+        };
+
+        request.onerror = function (e) {
+            reject("Erro ao abrir banco de dados: " + e.target.errorCode);
+        };
+    });
+}
+
+// Função para obter os pilotos do banco de dados
+function getPilots() {
+    return new Promise((resolve, reject) => {
+        const dbRequest = openDatabase();
+
+        dbRequest.then(db => {
+            const transaction = db.transaction(storeName, 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+
+            request.onsuccess = function () {
+                pilots = request.result;
+                resolve(pilots);
+            };
+
+            request.onerror = function (e) {
+                reject("Erro ao buscar pilotos: " + e.target.errorCode);
+            };
+        }).catch(error => {
+            reject(error);
+        });
+    });
+}
+
+// Função para salvar pilotos no banco de dados
+function savePilots() {
+    openDatabase().then(db => {
+        const transaction = db.transaction(storeName, 'readwrite');
+        const store = transaction.objectStore(storeName);
+
+        pilots.forEach(pilot => {
+            store.put(pilot);
+        });
+
+        transaction.oncomplete = function () {
+            console.log('Pilotos salvos com sucesso!');
+        };
+
+        transaction.onerror = function (e) {
+            console.error("Erro ao salvar pilotos:", e.target.errorCode);
+        };
+    }).catch(error => {
+        console.error("Erro ao abrir banco de dados:", error);
+    });
+}
 
 // Função de Login
 function login() {
@@ -99,13 +170,9 @@ function removePilot(index) {
     }
 }
 
-// Salva os pilotos no localStorage
-function savePilots() {
-    localStorage.setItem("kartPilots", JSON.stringify(pilots));
-}
-
 // Inicia a aplicação
 window.onload = function () {
     document.getElementById("loginForm").style.display = "flex";
     document.getElementById("content").style.display = "none";
+    getPilots().then(() => updateTable());
 };
