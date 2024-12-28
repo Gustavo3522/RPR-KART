@@ -36,10 +36,10 @@ function getPilots() {
         dbRequest.then(db => {
             const transaction = db.transaction(storeName, 'readonly');
             const store = transaction.objectStore(storeName);
-            const request = store.getAll();
+            const request = store.getAll();  // Pega todos os pilotos armazenados
 
             request.onsuccess = function () {
-                pilots = request.result;
+                pilots = request.result;  // Armazena os pilotos na variável
                 resolve(pilots);
             };
 
@@ -58,8 +58,9 @@ function savePilots() {
         const transaction = db.transaction(storeName, 'readwrite');
         const store = transaction.objectStore(storeName);
 
+        // Deleta todos os pilotos antigos antes de adicionar os novos
         pilots.forEach(pilot => {
-            store.put(pilot);
+            store.put(pilot);  // Atualiza o piloto na store
         });
 
         transaction.oncomplete = function () {
@@ -96,13 +97,13 @@ function showContent() {
     document.getElementById("loginForm").style.display = "none";
     document.getElementById("content").style.display = "block";
     document.getElementById("addPilot").style.display = isAdmin ? "block" : "none";
-    updateTable();
+    getPilots().then(() => updateTable());  // Atualiza a tabela após carregar os pilotos
 }
 
 // Atualiza a tabela com base no tipo de usuário
 function updateTable() {
     const tableBody = document.getElementById("tableBody");
-    tableBody.innerHTML = "";
+    tableBody.innerHTML = ""; // Limpa a tabela antes de atualizar
 
     pilots.sort((a, b) => b.points - a.points);
 
@@ -155,7 +156,15 @@ function addPilot() {
     if (!isAdmin) return;
     const name = prompt("Nome do piloto:");
     if (!name) return;
-    pilots.push({ name, points: 0, bestLap: null });
+    const newPilot = { name, points: 0, bestLap: null };
+
+    // Verifica se o piloto já existe para evitar duplicação
+    if (pilots.some(pilot => pilot.name === newPilot.name)) {
+        alert("Piloto já cadastrado!");
+        return;
+    }
+
+    pilots.push(newPilot);
     savePilots();
     updateTable();
 }
@@ -174,5 +183,5 @@ function removePilot(index) {
 window.onload = function () {
     document.getElementById("loginForm").style.display = "flex";
     document.getElementById("content").style.display = "none";
-    getPilots().then(() => updateTable());
+    getPilots().then(() => updateTable()); // Inicializa a tabela ao carregar os dados
 };
