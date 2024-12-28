@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="img/FAV.jpg" type="image/x-icon">
+    <title>RPM Racing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Formulário de Login -->
+    <div id="loginForm">
+        <h2>Login</h2>
+        <input type="password" id="password" placeholder="Digite a senha">
+        <button onclick="login()">Entrar</button>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div id="content" style="display: none;">
+        <div class="header">
+            <img src="img/RPM2.png" alt="Logo do Campeonato" class="logo">
+            <h1>CAMPEONATO DE KART RPR RACING</h1>
+        </div>
+        
+        <!-- Container da Tabela -->
+        <div class="table-container">
+            <table id="kartTable">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Piloto</th>
+                        <th>Pontos</th>
+                        <th>Melhor Volta (MM:SS.mmm)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Linhas da tabela serão adicionadas dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+        <div id="addPilot" style="display: none;">
+            <button onclick="addPilot()">Adicionar Piloto</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
