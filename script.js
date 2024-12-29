@@ -2,6 +2,34 @@ const ADMIN_PASSWORD = "kartadmin123"; // Senha do administrador
 const VIEWER_PASSWORD = "tabela"; // Senha apenas para visualização
 const pilots = JSON.parse(localStorage.getItem("kartPilots")) || [];
 let isAdmin = false; // Define se o usuário tem permissão de administrador
+
+
+
+const connection = mysql.createConnection({
+    host: '127.0.0.1:3306', // Endereço do servidor MySQL
+    user: 'u878056332_admin', // Usuário do banco de dados
+    password: 'bancoRoda123!', // Senha do banco de dados
+    database: 'u878056332_usuarios' // Nome do banco de dados
+  });
+
+
+// Estabelecendo a conexão
+connection.connect((err) => {
+    if (err) {
+      console.error('Erro ao conectar ao MySQL:', err.message);
+      return;
+    }
+    console.log('Conexão bem-sucedida ao MySQL!');
+  });
+
+connection.query('SELECT * FROM `listaCampeonato`', (err, results) => {
+    if (err) {
+      console.error('Erro na consulta:', err.message);
+      return;
+    }
+    console.log('Resultados da consulta:', results);
+  });
+
 // Função de Login
 function login() {
     const password = document.getElementById("password").value;
@@ -17,6 +45,8 @@ function login() {
         alert("Senha incorreta!");
     }
 }
+
+
 // Mostra o conteúdo baseado no tipo de usuário
 function showContent() {
     document.getElementById("loginForm").style.display = "none";
@@ -24,6 +54,8 @@ function showContent() {
     document.getElementById("addPilot").style.display = isAdmin ? "block" : "none";
     updateTable();
 }
+
+
 // Atualiza a tabela com base no tipo de usuário
 function updateTable() {
     const tableBody = document.getElementById("tableBody");
@@ -45,6 +77,8 @@ function updateTable() {
         tableBody.appendChild(row);
     });
 }
+
+
 // Atualiza os pontos de um piloto
 function updatePoints(index, value) {
     const newPoints = parseInt(value);
@@ -56,6 +90,8 @@ function updatePoints(index, value) {
         alert("Por favor, insira um valor válido para os pontos.");
     }
 }
+
+
 // Atualiza o melhor tempo de um piloto
 function updateBestLap(index, value) {
     const newBestLap = value.trim();
@@ -69,6 +105,8 @@ function updateBestLap(index, value) {
         alert("Por favor, insira um tempo válido no formato MM:SS.mmm.");
     }
 }
+
+
 // Adiciona um novo piloto (somente para administrador)
 function addPilot() {
     if (!isAdmin) return;
@@ -78,6 +116,8 @@ function addPilot() {
     savePilots();
     updateTable();
 }
+
+
 // Remove um piloto (somente para administrador)
 function removePilot(index) {
     if (!isAdmin) return;
@@ -87,12 +127,32 @@ function removePilot(index) {
         updateTable();
     }
 }
+
+
 // Salva os pilotos no localStorage
-function savePilots() {
-    localStorage.setItem("kartPilots", JSON.stringify(pilots));
-}
+//function savePilots() {
+//    localStorage.setItem("kartPilots", JSON.stringify(pilots));
+//}
+
+// Função para inserir dados na tabela listaCampeonato
+function savePilots(nome, pontos, melhorVolta, faltas) {
+    const query = `INSERT INTO listaCampeonato (Nome, Pontos, MelhorVoltar, Faltas) VALUES (?, ?, ?, ?)`;
+    
+    // Executa a query
+    connection.query(query, [nome, pontos, melhorVolta, faltas], (err, results) => {
+      if (err) {
+        console.error('Erro ao inserir dados:', err.message);
+        return;
+      }
+      console.log('Dados inseridos com sucesso! ID:', results.insertId);
+    });
+  }
+
+
 // Inicia a aplicação
 window.onload = function () {
     document.getElementById("loginForm").style.display = "flex";
     document.getElementById("content").style.display = "none";
 };
+
+connection.end();
