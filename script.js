@@ -146,7 +146,7 @@ function savePilots(nome, pontos, melhorVolta, faltas) {
       }
       console.log('Dados inseridos com sucesso! ID:', results.insertId);
     });
-  }
+}
 
 
 // Inicia a aplicação
