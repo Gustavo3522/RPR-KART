@@ -8,13 +8,13 @@ document.addEventListener("DOMContentLoaded", function() {
         const username = document.getElementById("username").value;
         const password = document.getElementById("password").value;
 
-        if (username === "admin" && password === "1234") {
+        if (username === "admin" && password === "admin1234") {
             localStorage.setItem("user", "admin");
             loginSection.style.display = "none";
             dashboard.style.display = "block";
             carregarPilotos();
             formularioPiloto.style.display = "block";
-        } else if (username === "viewer" && password === "1234") {
+        } else if (username === "piloto" && password === "tabela") {
             localStorage.setItem("user", "viewer");
             loginSection.style.display = "none";
             dashboard.style.display = "block";
